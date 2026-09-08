@@ -1,6 +1,9 @@
 import { NavLink } from 'react-router-dom';
 import './Sidebar.css';
 
+// Each role's "Dashboard" points at that role's own landing page, not a shared "/" -
+// otherwise navigating there from a Mentor/Admin view would silently drop back into
+// the Student dashboard's content, since "/" only ever renders the student persona.
 const NAV_ITEMS = {
   student: [
     { to: '/', label: 'Dashboard', icon: '▦' },
@@ -8,14 +11,12 @@ const NAV_ITEMS = {
     { to: '/export-profile', label: 'Export Profile', icon: '▤' },
   ],
   reviewer: [
-    { to: '/', label: 'Dashboard', icon: '▦' },
-    { to: '/review-queue', label: 'My Experiences', icon: '⇄' },
+    { to: '/review-queue', label: 'Dashboard', icon: '▦' },
     { to: '/export-profile', label: 'Export Profile', icon: '▤' },
   ],
   admin: [
-    { to: '/', label: 'Dashboard', icon: '▦' },
+    { to: '/analytics', label: 'Dashboard', icon: '▦' },
     { to: '/student-records', label: 'Student Records', icon: '☰' },
-    { to: '/analytics', label: 'Analytics', icon: '▥' },
     { to: '/export-profile', label: 'Export Profile', icon: '▤' },
   ],
 };
