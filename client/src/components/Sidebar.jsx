@@ -26,12 +26,12 @@ const FOOTER_CONTENT = {
   admin: { title: 'Admin Officer', subtitle: 'Placement Cell' },
 };
 
-function Sidebar({ role = 'student' }) {
+function Sidebar({ role = 'student', open = false, onClose }) {
   const items = NAV_ITEMS[role] || NAV_ITEMS.student;
   const footer = FOOTER_CONTENT[role] || FOOTER_CONTENT.student;
 
   return (
-    <aside className="sidebar">
+    <aside className={'sidebar' + (open ? ' sidebar-open' : '')}>
       <div className="sidebar-brand">
         <span className="sidebar-brand-name">Experience Ledger</span>
         <span className="sidebar-brand-tag">Verified Achievement</span>
@@ -43,6 +43,7 @@ function Sidebar({ role = 'student' }) {
             key={item.to}
             to={item.to}
             end={item.to === '/'}
+            onClick={onClose}
             className={({ isActive }) => 'sidebar-link' + (isActive ? ' sidebar-link-active' : '')}
           >
             <span className="sidebar-icon" aria-hidden="true">{item.icon}</span>

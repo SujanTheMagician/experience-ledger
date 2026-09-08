@@ -133,89 +133,91 @@ function ReviewQueue() {
           </div>
 
           <div className="review-table">
-            <div className="review-table-head">
-              <span>Student Name</span>
-              <span>Organization</span>
-              <span>Role</span>
-              <span>Date Submitted</span>
-              <span>Status</span>
-            </div>
-
-            {queue.length === 0 && <p className="review-queue-subtitle">No experiences to review.</p>}
-
-            {queue.map((item) => (
-              <div key={item.id} className="review-row-wrapper">
-                <button className="review-row" onClick={() => toggleExpand(item.id)}>
-                  <span className="review-student">
-                    <span className="review-avatar">{item.initials}</span>
-                    {item.studentName}
-                  </span>
-                  <span>{item.org}</span>
-                  <span>{item.role}</span>
-                  <span>{item.dateSubmitted}</span>
-                  <span className="review-status-cell">
-                    <StatusBadge status={item.status} />
-                    <span className={'review-caret' + (expandedId === item.id ? ' review-caret-open' : '')}>⌄</span>
-                  </span>
-                </button>
-
-                {expandedId === item.id && (
-                  <div className="review-detail">
-                    {item.summary && (
-                      <>
-                        <label className="form-label">Achievement Summary</label>
-                        <p className="review-summary">{item.summary}</p>
-                      </>
-                    )}
-                    {item.outcome && (
-                      <>
-                        <label className="form-label">Outcome</label>
-                        <p className="review-summary">{item.outcome}</p>
-                      </>
-                    )}
-
-                    <label className="form-label">Mentor Feedback</label>
-                    <textarea
-                      placeholder="Add private notes or public feedback..."
-                      rows={2}
-                      value={notes[item.id] || ''}
-                      onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
-                    />
-
-                    <div className="review-actions">
-                      <button
-                        className="btn-primary"
-                        disabled={actioningId === item.id}
-                        onClick={() => decide(item.id, 'Approved')}
-                      >
-                        ✓ Approve Submission
-                      </button>
-                      <button
-                        className="btn-secondary"
-                        disabled={actioningId === item.id}
-                        onClick={() => decide(item.id, 'Changes Requested')}
-                      >
-                        ✎ Request Changes
-                      </button>
-                      <button
-                        className="btn-danger"
-                        disabled={actioningId === item.id}
-                        onClick={() => decide(item.id, 'Rejected')}
-                      >
-                        ✕ Reject
-                      </button>
-                      <button
-                        className="btn-danger"
-                        disabled={actioningId === item.id}
-                        onClick={() => remove(item.id)}
-                      >
-                        🗑 Delete Entry
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <div className="review-table-scroll">
+              <div className="review-table-head">
+                <span>Student Name</span>
+                <span>Organization</span>
+                <span>Role</span>
+                <span>Date Submitted</span>
+                <span>Status</span>
               </div>
-            ))}
+
+              {queue.length === 0 && <p className="review-queue-subtitle">No experiences to review.</p>}
+
+              {queue.map((item) => (
+                <div key={item.id} className="review-row-wrapper">
+                  <button className="review-row" onClick={() => toggleExpand(item.id)}>
+                    <span className="review-student">
+                      <span className="review-avatar">{item.initials}</span>
+                      {item.studentName}
+                    </span>
+                    <span>{item.org}</span>
+                    <span>{item.role}</span>
+                    <span>{item.dateSubmitted}</span>
+                    <span className="review-status-cell">
+                      <StatusBadge status={item.status} />
+                      <span className={'review-caret' + (expandedId === item.id ? ' review-caret-open' : '')}>⌄</span>
+                    </span>
+                  </button>
+
+                  {expandedId === item.id && (
+                    <div className="review-detail">
+                      {item.summary && (
+                        <>
+                          <label className="form-label">Achievement Summary</label>
+                          <p className="review-summary">{item.summary}</p>
+                        </>
+                      )}
+                      {item.outcome && (
+                        <>
+                          <label className="form-label">Outcome</label>
+                          <p className="review-summary">{item.outcome}</p>
+                        </>
+                      )}
+
+                      <label className="form-label">Mentor Feedback</label>
+                      <textarea
+                        placeholder="Add private notes or public feedback..."
+                        rows={2}
+                        value={notes[item.id] || ''}
+                        onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                      />
+
+                      <div className="review-actions">
+                        <button
+                          className="btn-primary"
+                          disabled={actioningId === item.id}
+                          onClick={() => decide(item.id, 'Approved')}
+                        >
+                          ✓ Approve Submission
+                        </button>
+                        <button
+                          className="btn-secondary"
+                          disabled={actioningId === item.id}
+                          onClick={() => decide(item.id, 'Changes Requested')}
+                        >
+                          ✎ Request Changes
+                        </button>
+                        <button
+                          className="btn-danger"
+                          disabled={actioningId === item.id}
+                          onClick={() => decide(item.id, 'Rejected')}
+                        >
+                          ✕ Reject
+                        </button>
+                        <button
+                          className="btn-danger"
+                          disabled={actioningId === item.id}
+                          onClick={() => remove(item.id)}
+                        >
+                          🗑 Delete Entry
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </>
       )}

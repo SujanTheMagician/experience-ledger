@@ -1,8 +1,13 @@
 import './Header.css';
 
-function Header({ user, searchPlaceholder = 'Search experiences...', onLogout }) {
+function Header({ user, searchPlaceholder = 'Search experiences...', onLogout, onMenuClick }) {
   return (
     <header className="app-header">
+      {onMenuClick && (
+        <button className="app-header-menu-btn" aria-label="Open menu" onClick={onMenuClick}>
+          ☰
+        </button>
+      )}
       <div className="app-header-search">
         <span className="app-header-search-icon" aria-hidden="true">⌕</span>
         <input type="text" placeholder={searchPlaceholder} aria-label="Search" />

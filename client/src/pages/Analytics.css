@@ -133,6 +133,10 @@
   font-weight: 700;
 }
 
+.cohort-table-scroll {
+  overflow-x: auto;
+}
+
 .cohort-table-head,
 .cohort-row {
   display: grid;
@@ -140,6 +144,7 @@
   gap: 12px;
   align-items: center;
   padding: 12px 8px;
+  min-width: 600px;
 }
 
 .cohort-table-head {

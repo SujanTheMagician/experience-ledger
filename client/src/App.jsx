@@ -6,6 +6,10 @@ import ReviewQueue from './pages/ReviewQueue';
 import Analytics from './pages/Analytics';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import MyExperiences from './pages/MyExperiences';
+import ExportProfile from './pages/ExportProfile';
+import StudentRecords from './pages/StudentRecords';
+import NotFound from './pages/NotFound';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import { currentStudent, currentReviewer, currentAdmin } from './data/mockData';
@@ -17,8 +21,11 @@ import './App.css';
 const ROUTE_CONFIG = [
   { path: '/', role: 'student', user: currentStudent, element: <Dashboard /> },
   { path: '/add-experience', role: 'student', user: currentStudent, element: <AddExperience /> },
+  { path: '/my-experiences', role: 'student', user: currentStudent, element: <MyExperiences /> },
+  { path: '/export-profile', role: 'student', user: currentStudent, element: <ExportProfile /> },
   { path: '/review-queue', role: 'reviewer', user: currentReviewer, element: <ReviewQueue /> },
   { path: '/analytics', role: 'admin', user: currentAdmin, element: <Analytics /> },
+  { path: '/student-records', role: 'admin', user: currentAdmin, element: <StudentRecords /> },
 ];
 
 function RoleSwitcher() {
@@ -75,6 +82,7 @@ function AppRoutes() {
           }
         />
       ))}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

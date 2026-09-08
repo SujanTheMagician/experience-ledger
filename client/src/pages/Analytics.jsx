@@ -76,34 +76,36 @@ function Analytics() {
           </div>
           <button className="btn-primary">Export Report</button>
         </div>
-        <div className="cohort-table-head">
-          <span>Student Name</span>
-          <span>Department</span>
-          <span>Verified Exp.</span>
-          <span>Top Skills</span>
-          <span>Readiness</span>
-        </div>
-        {studentCohort.map((student) => (
-          <div key={student.id} className="cohort-row">
-            <span className="cohort-student">
-              <span className="review-avatar">{student.name.split(' ').map((n) => n[0]).join('')}</span>
-              <span>
-                <div>{student.name}</div>
-                <div className="cohort-roll">Roll: {student.rollNo}</div>
-              </span>
-            </span>
-            <span>{student.department}</span>
-            <span><span className="skill-chip skill-chip-active">{student.verifiedExp}</span></span>
-            <span className="skill-cloud">
-              {student.topSkills.map((s) => <span key={s} className="skill-chip">{s}</span>)}
-              {student.extraSkills > 0 && <span className="skill-chip">+{student.extraSkills}</span>}
-            </span>
-            <span className="readiness-bar-track">
-              <span className="readiness-bar-fill" style={{ width: `${student.readiness}%` }} />
-              <span className="readiness-bar-label">{student.readiness}%</span>
-            </span>
+        <div className="cohort-table-scroll">
+          <div className="cohort-table-head">
+            <span>Student Name</span>
+            <span>Department</span>
+            <span>Verified Exp.</span>
+            <span>Top Skills</span>
+            <span>Readiness</span>
           </div>
-        ))}
+          {studentCohort.map((student) => (
+            <div key={student.id} className="cohort-row">
+              <span className="cohort-student">
+                <span className="review-avatar">{student.name.split(' ').map((n) => n[0]).join('')}</span>
+                <span>
+                  <div>{student.name}</div>
+                  <div className="cohort-roll">Roll: {student.rollNo}</div>
+                </span>
+              </span>
+              <span>{student.department}</span>
+              <span><span className="skill-chip skill-chip-active">{student.verifiedExp}</span></span>
+              <span className="skill-cloud">
+                {student.topSkills.map((s) => <span key={s} className="skill-chip">{s}</span>)}
+                {student.extraSkills > 0 && <span className="skill-chip">+{student.extraSkills}</span>}
+              </span>
+              <span className="readiness-bar-track">
+                <span className="readiness-bar-fill" style={{ width: `${student.readiness}%` }} />
+                <span className="readiness-bar-label">{student.readiness}%</span>
+              </span>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
