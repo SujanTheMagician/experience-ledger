@@ -1,9 +1,13 @@
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import AddExperience from './pages/AddExperience';
 import ReviewQueue from './pages/ReviewQueue';
 import Analytics from './pages/Analytics';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 import { currentStudent, currentReviewer, currentAdmin } from './data/mockData';
 import './App.css';
 
@@ -41,18 +45,33 @@ function RoleSwitcher() {
   );
 }
 
+function RequireAuth({ children }) {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       {ROUTE_CONFIG.map(({ path, role, user, element }) => (
         <Route
           key={path}
           path={path}
           element={
-            <Layout role={role} user={user}>
-              <RoleSwitcher />
-              {element}
-            </Layout>
+            <RequireAuth>
+              <Layout role={role} user={user}>
+                <RoleSwitcher />
+                {element}
+              </Layout>
+            </RequireAuth>
           }
         />
       ))}
@@ -63,7 +82,9 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

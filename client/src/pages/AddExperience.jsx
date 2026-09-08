@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createExperience } from '../api/experiences';
 import './AddExperience.css';
 
 const initialForm = {
@@ -18,6 +19,8 @@ function AddExperience() {
   const [form, setForm] = useState(initialForm);
   const [skills, setSkills] = useState(['React', 'Python', 'TypeScript']);
   const [skillInput, setSkillInput] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const updateField = (field) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -36,10 +39,30 @@ function AddExperience() {
     setSkills((prev) => prev.filter((s) => s !== skill));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // No backend yet — this is where a POST /experiences call will go.
-    navigate('/');
+    setSubmitting(true);
+    setError(null);
+    try {
+      const duration = form.currentlyWorking
+        ? `${form.startDate} - Present`
+        : `${form.startDate} - ${form.endDate}`;
+
+      await createExperience({
+        type: 'internship',
+        organization: form.organization,
+        role: form.role,
+        duration,
+        description: form.description,
+        outcome: form.outcomes,
+        evidenceLink: form.projectLink,
+      });
+      navigate('/');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -156,8 +179,9 @@ function AddExperience() {
                 </span>
               ))}
             </div>
-            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 16 }}>
-              Submit for Review
+            {error && <p className="secure-note" style={{ color: '#c0392b' }}>⚠ {error}</p>}
+            <button type="submit" className="btn-primary" style={{ width: '100%', marginTop: 16 }} disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit for Review'}
             </button>
             <button type="button" className="btn-secondary" style={{ width: '100%', marginTop: 8 }}>
               Save as Draft

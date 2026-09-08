@@ -1,6 +1,6 @@
 import './Header.css';
 
-function Header({ user, searchPlaceholder = 'Search experiences...' }) {
+function Header({ user, searchPlaceholder = 'Search experiences...', onLogout }) {
   return (
     <header className="app-header">
       <div className="app-header-search">
@@ -19,6 +19,11 @@ function Header({ user, searchPlaceholder = 'Search experiences...' }) {
           </div>
           <div className="app-header-avatar">{user.avatarInitials}</div>
         </div>
+        {onLogout && (
+          <button className="app-header-icon-btn" aria-label="Log out" title="Log out" onClick={onLogout}>
+            ⎋
+          </button>
+        )}
       </div>
     </header>
   );
