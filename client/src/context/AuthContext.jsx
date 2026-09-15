@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { loginUser, registerUser } from '../api/auth';
+import { loginUser, registerUser, googleLogin } from '../api/auth';
 import { AuthContext } from './auth-context';
 
 const TOKEN_KEY = 'el_token';
@@ -37,6 +37,12 @@ export function AuthProvider({ children }) {
     return newUser;
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential) => {
+    const { token: newToken, user: newUser } = await googleLogin({ credential });
+    persist(newToken, newUser);
+    return newUser;
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -45,8 +51,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ token, user, isAuthenticated: Boolean(token), login, register, logout }),
-    [token, user, login, register, logout]
+    () => ({ token, user, isAuthenticated: Boolean(token), login, register, loginWithGoogle, logout }),
+    [token, user, login, register, loginWithGoogle, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
