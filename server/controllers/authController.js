@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { OAuth2Client } = require('google-auth-library');
 const { pool } = require('../config/db');
 
 const ALLOWED_ROLES = ['student', 'mentor', 'placement_officer', 'admin'];
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signToken = (user) =>
   jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -88,4 +90,56 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe };
+// @desc   Log in (or silently register) with a Google ID token from Google Identity Services
+// @route  POST /api/auth/google
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ success: false, message: 'Google credential is required' });
+    }
+
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Invalid Google credential' });
+    }
+
+    const { sub: googleId, email, name } = payload;
+
+    let { rows } = await pool.query('SELECT * FROM users WHERE google_id = $1', [googleId]);
+    let user = rows[0];
+
+    if (!user) {
+      ({ rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]));
+      user = rows[0];
+
+      if (user) {
+        // An account with this email already exists (registered with a password) -
+        // link the Google identity to it instead of creating a duplicate account.
+        ({ rows } = await pool.query('UPDATE users SET google_id = $1 WHERE id = $2 RETURNING *', [googleId, user.id]));
+        user = rows[0];
+      } else {
+        ({ rows } = await pool.query(
+          `INSERT INTO users (name, email, google_id, role)
+           VALUES ($1, $2, $3, 'student')
+           RETURNING *`,
+          [name, email, googleId]
+        ));
+        user = rows[0];
+      }
+    }
+
+    return res.status(200).json({ success: true, token: signToken(user), user: toPublicUser(user) });
+  } catch (error) {
+    console.error('Error with Google login:', error.message);
+    return res.status(500).json({ success: false, message: 'Server error during Google login' });
+  }
+};
+
+module.exports = { register, login, googleLogin, getMe };

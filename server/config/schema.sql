@@ -4,14 +4,16 @@ CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
-  password TEXT NOT NULL,
+  password TEXT,
+  google_id VARCHAR(255) UNIQUE,
   role VARCHAR(50) NOT NULL DEFAULT 'student'
     CHECK (role IN ('student', 'mentor', 'placement_officer', 'admin')),
   department VARCHAR(255),
   batch VARCHAR(50),
   mentor_id INTEGER REFERENCES users(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT users_password_or_google_id CHECK (password IS NOT NULL OR google_id IS NOT NULL)
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_mentor_id ON users(mentor_id);

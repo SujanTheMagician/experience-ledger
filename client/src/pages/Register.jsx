@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import './Auth.css';
 
 const ROLES = [
@@ -74,6 +75,13 @@ function Register() {
             {submitting ? 'Creating account…' : 'Create Account'}
           </button>
         </form>
+
+        <div className="auth-divider"><span>or</span></div>
+
+        <GoogleSignInButton
+          onSuccess={() => navigate('/', { replace: true })}
+          onError={setError}
+        />
 
         <p className="auth-footer">
           Already have an account? <Link to="/login">Log in</Link>

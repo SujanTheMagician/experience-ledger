@@ -25,3 +25,12 @@ export async function loginUser({ email, password }) {
   });
   return handleResponse(res);
 }
+
+export async function googleLogin({ credential }) {
+  const res = await fetch(`${BASE_URL}/api/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  return handleResponse(res);
+}
