@@ -1,0 +1,22 @@
+meta {
+  name: Get Current User
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/auth/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Returns the currently authenticated user, resolved from the Bearer
+  token's id claim - not from any client-supplied id.
+
+  Run Login first so {{token}} is populated.
+}

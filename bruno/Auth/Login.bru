@@ -1,0 +1,39 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "alex.rivera@example.com",
+    "password": "password123"
+  }
+}
+
+script:post-response {
+  if (res.body && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}
+
+docs {
+  Authenticates with email + password, returns a JWT signed with the
+  server's JWT_SECRET, valid for 7 days.
+
+  The post-response script above automatically saves the returned token
+  into the {{token}} environment variable, so every other protected
+  request in this collection works right after running this one - no
+  manual copy-pasting needed.
+
+  Demo accounts (after running `npm run db:seed` on the server):
+  - alex.rivera@example.com  (student)
+  - sarah.jenkins@example.com (mentor)
+  both with password: password123
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Upload Evidence File
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/uploads
+  body: multipartForm
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  file: @file(./sample-evidence.pdf)
+}
+
+docs {
+  Uploads a single evidence file (certificate / proof of work) as
+  multipart/form-data under the field name "file".
+
+  Allowed types: PDF, JPG, PNG. Max size: 10MB - both enforced
+  server-side with multer, not just in the UI. Returns the file's served
+  URL under /uploads/<filename>, which the frontend then passes as
+  evidenceLink when creating an experience.
+
+  In the Bruno app, click the file field in the Body tab and pick a real
+  file from disk before sending - the @file() placeholder above just
+  marks the field as a file input.
+
+  Run Login first so {{token}} is populated.
+}

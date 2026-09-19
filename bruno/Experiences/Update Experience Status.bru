@@ -1,0 +1,34 @@
+meta {
+  name: Update Experience Status
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/experiences/1/status
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "Approved",
+    "mentorComment": "Looks good, approved."
+  }
+}
+
+docs {
+  Mentor / placement_officer / admin only: approves, rejects, or requests
+  changes on an experience. `status` must be one of Pending Verification,
+  Approved, Rejected, Changes Requested.
+
+  This route is protected by both authentication (must be logged in) and
+  authorization (must have one of the reviewer roles) - log in as a
+  mentor (e.g. sarah.jenkins@example.com) via Login before running this.
+  A student's token gets a 403 "You do not have permission to perform
+  this action".
+}

@@ -1,0 +1,17 @@
+meta {
+  name: Get Experience By Id
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/experiences/1
+  body: none
+  auth: none
+}
+
+docs {
+  Fetches a single experience by id, joined against the owning student's
+  details. Replace `1` in the URL with a real experience id (run Get All
+  Experiences first to find one). Returns 404 if it doesn't exist.
+}

@@ -1,0 +1,41 @@
+meta {
+  name: Create Experience
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/experiences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "type": "internship",
+    "organization": "Acme Corporation",
+    "role": "Backend Intern",
+    "duration": "Jun 2026 - Aug 2026",
+    "description": "Built REST APIs for the core product.",
+    "outcome": "Shipped 3 endpoints to production.",
+    "evidenceLink": "https://github.com/example/repo"
+  }
+}
+
+docs {
+  Creates a new experience owned by the logged-in user. student_id is
+  always taken from the JWT (req.user.id), never from the request body -
+  this prevents one user from submitting an experience under someone
+  else's account. New experiences always start in "Pending Verification"
+  status.
+
+  `evidenceLink` can be a manually typed URL, or the URL returned by the
+  Upload Evidence File request (see the Uploads folder) if the student
+  attached a certificate instead of a link.
+
+  Run Login first so {{token}} is populated.
+}
