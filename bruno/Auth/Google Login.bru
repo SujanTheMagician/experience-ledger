@@ -1,0 +1,31 @@
+meta {
+  name: Google Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/google
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "credential": "paste-a-real-google-id-token-here"
+  }
+}
+
+docs {
+  Authenticates with a Google ID token obtained client-side via Google
+  Identity Services (see client/src/components/GoogleSignInButton.jsx).
+  The server verifies the token's signature and audience with
+  google-auth-library, then finds an existing user by google_id, links an
+  existing password account with the same email, or creates a new student
+  account - returning the same response shape as Login either way.
+
+  This request can't be exercised directly from Bruno with a fake value:
+  Google's servers reject any credential that isn't a real, freshly-issued
+  ID token from an actual browser sign-in. Included here for documentation
+  completeness - the real flow is demonstrated through the app's UI.
+}
