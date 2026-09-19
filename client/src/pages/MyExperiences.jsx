@@ -3,11 +3,16 @@ import { Link } from 'react-router-dom';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/useAuth';
 import { fetchExperiences, deleteExperience } from '../api/experiences';
+import { resolveFileUrl } from '../api/uploads';
 import './ReviewQueue.css';
 
 function formatDate(value) {
   if (!value) return '';
   return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function isUploadedFile(link) {
+  return typeof link === 'string' && link.startsWith('/uploads/');
 }
 
 function MyExperiences() {
@@ -112,6 +117,16 @@ function MyExperiences() {
                       <>
                         <label className="form-label">Outcome</label>
                         <p className="review-summary">{item.outcome}</p>
+                      </>
+                    )}
+                    {item.evidence_link && (
+                      <>
+                        <label className="form-label">Supporting Evidence</label>
+                        <p className="review-summary">
+                          <a href={resolveFileUrl(item.evidence_link)} target="_blank" rel="noopener noreferrer" className="review-doc-link">
+                            {isUploadedFile(item.evidence_link) ? '📎 View uploaded file' : '🔗 View link'}
+                          </a>
+                        </p>
                       </>
                     )}
                     {item.mentor_comment && (

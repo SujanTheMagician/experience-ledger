@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import StatusBadge from '../components/StatusBadge';
 import { fetchExperiences, updateExperienceStatus, deleteExperience } from '../api/experiences';
+import { resolveFileUrl } from '../api/uploads';
 import './ReviewQueue.css';
 
 function initialsOf(name = '') {
@@ -29,7 +30,12 @@ function toRow(experience) {
     status: experience.status,
     summary: experience.description,
     outcome: experience.outcome,
+    evidenceLink: experience.evidence_link,
   };
+}
+
+function isUploadedFile(link) {
+  return typeof link === 'string' && link.startsWith('/uploads/');
 }
 
 function ReviewQueue() {
@@ -172,6 +178,16 @@ function ReviewQueue() {
                         <>
                           <label className="form-label">Outcome</label>
                           <p className="review-summary">{item.outcome}</p>
+                        </>
+                      )}
+                      {item.evidenceLink && (
+                        <>
+                          <label className="form-label">Supporting Evidence</label>
+                          <p className="review-summary">
+                            <a href={resolveFileUrl(item.evidenceLink)} target="_blank" rel="noopener noreferrer" className="review-doc-link">
+                              {isUploadedFile(item.evidenceLink) ? '📎 View uploaded file' : '🔗 View link'}
+                            </a>
+                          </p>
                         </>
                       )}
 
