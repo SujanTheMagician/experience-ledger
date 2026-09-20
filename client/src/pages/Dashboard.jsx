@@ -1,35 +1,65 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/useAuth';
+import { fetchExperiences } from '../api/experiences';
 import {
   dashboardStats,
-  recentActivity,
   ledgerCompletion,
   skillCloud,
   verificationLog,
-  currentStudent,
 } from '../data/mockData';
 import './Dashboard.css';
 
 const STAT_ICONS = { sparkle: '✦', clock: '◔', bolt: '⚡', hash: '#' };
+const RECENT_ACTIVITY_LIMIT = 5;
 
 function Dashboard() {
+  const { user } = useAuth();
+  const [experiences, setExperiences] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchExperiences({ student: user.id })
+      .then((data) => {
+        if (!cancelled) setExperiences(data);
+      })
+      .catch(() => {
+        // Dashboard is a summary view - if this fails, just show the empty state
+        // rather than blocking the page with an error banner.
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user.id]);
+
+  const recentActivity = experiences.slice(0, RECENT_ACTIVITY_LIMIT);
   const hasActivity = recentActivity.length > 0;
+  const firstName = user.name.split(' ')[0];
+
+  const stats = dashboardStats.map((stat) =>
+    stat.label === 'Total Experiences' ? { ...stat, value: experiences.length, meta: undefined } : stat
+  );
 
   return (
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
-          <h1>Welcome back, {currentStudent.name.split(' ')[0]}!</h1>
-          <p className="dashboard-subtitle">
-            You have 2 pending verifications and a 12% increase in logged hours this month.
-          </p>
+          <h1>Welcome back, {firstName}!</h1>
+          <p className="dashboard-subtitle">Here's what's happening with your verified ledger.</p>
         </div>
         <Link to="/add-experience" className="btn-primary">+ Add New Experience</Link>
       </div>
 
       <div className="dashboard-stats">
-        {dashboardStats.map((stat) => (
+        {stats.map((stat) => (
           <StatCard
             key={stat.label}
             label={stat.label}
@@ -47,7 +77,9 @@ function Dashboard() {
             <span className="dashboard-live-pill">Live</span>
           </div>
 
-          {!hasActivity && (
+          {loading && <p className="dashboard-empty-subtitle">Loading your experiences…</p>}
+
+          {!loading && !hasActivity && (
             <div className="dashboard-empty">
               <p className="dashboard-empty-title">No experiences logged yet</p>
               <p className="dashboard-empty-subtitle">
@@ -57,27 +89,20 @@ function Dashboard() {
             </div>
           )}
 
-          {hasActivity && (
+          {!loading && hasActivity && (
             <ul className="dashboard-timeline">
               {recentActivity.map((item) => (
                 <li key={item.id} className="dashboard-timeline-item">
                   <div className="dashboard-timeline-dot" />
                   <div className="dashboard-timeline-card">
                     <div className="dashboard-timeline-top">
-                      <h3>{item.title}</h3>
+                      <h3>{item.role}</h3>
                       <StatusBadge status={item.status} />
                     </div>
-                    <p className="dashboard-timeline-meta">{item.org} • {item.duration}</p>
+                    <p className="dashboard-timeline-meta">{item.organization} • {item.duration || '—'}</p>
                     {item.description && <p className="dashboard-timeline-desc">{item.description}</p>}
-                    {item.reviewerNote && (
-                      <p className="dashboard-timeline-note">"{item.reviewerNote}"</p>
-                    )}
-                    {item.skills.length > 0 && (
-                      <div className="dashboard-timeline-skills">
-                        {item.skills.map((skill) => (
-                          <span key={skill} className="skill-chip">{skill}</span>
-                        ))}
-                      </div>
+                    {item.mentor_comment && (
+                      <p className="dashboard-timeline-note">"{item.mentor_comment}"</p>
                     )}
                   </div>
                 </li>
