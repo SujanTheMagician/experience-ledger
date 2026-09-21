@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import MyExperiences from './pages/MyExperiences';
 import ExportProfile from './pages/ExportProfile';
 import StudentRecords from './pages/StudentRecords';
+import UserManagement from './pages/UserManagement';
 import NotFound from './pages/NotFound';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
@@ -39,6 +40,10 @@ const ROUTE_CONFIG = [
   { path: '/review-queue', role: 'reviewer', user: currentReviewer, element: <ReviewQueue /> },
   { path: '/analytics', role: 'admin', user: currentAdmin, element: <Analytics /> },
   { path: '/student-records', role: 'admin', user: currentAdmin, element: <StudentRecords /> },
+  // Unlike the other admin-persona routes above (demo previews anyone can switch into),
+  // this one performs real role mutations on real accounts - gated by the actually
+  // logged-in user's real role below, not just the "Preview as" persona.
+  { path: '/user-management', role: 'admin', user: currentAdmin, element: <UserManagement />, requireRealAdmin: true },
 ];
 
 function RoleSwitcher() {
@@ -78,6 +83,19 @@ function RequireAuth({ children }) {
   return children;
 }
 
+// Unlike RequireAuth, this checks the real authenticated account's role (not the
+// "Preview as" persona) - for routes like /user-management that mutate real accounts,
+// where every other role must be turned away regardless of which demo view they're on.
+function RequireRealAdmin({ children }) {
+  const { user } = useAuth();
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   const { user: authUser } = useAuth();
 
@@ -93,20 +111,25 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      {ROUTE_CONFIG.map(({ path, role, user, element }) => (
-        <Route
-          key={path}
-          path={path}
-          element={
-            <RequireAuth>
-              <Layout role={role} user={role === 'student' ? studentUser : user}>
-                <RoleSwitcher />
-                {element}
-              </Layout>
-            </RequireAuth>
-          }
-        />
-      ))}
+      {ROUTE_CONFIG.map(({ path, role, user, element, requireRealAdmin }) => {
+        const page = (
+          <Layout role={role} user={role === 'student' ? studentUser : user}>
+            <RoleSwitcher />
+            {element}
+          </Layout>
+        );
+        return (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <RequireAuth>
+                {requireRealAdmin ? <RequireRealAdmin>{page}</RequireRealAdmin> : page}
+              </RequireAuth>
+            }
+          />
+        );
+      })}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

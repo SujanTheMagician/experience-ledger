@@ -17,6 +17,7 @@ const NAV_ITEMS = {
   admin: [
     { to: '/analytics', label: 'Dashboard', icon: '▦' },
     { to: '/student-records', label: 'Student Records', icon: '☰' },
+    { to: '/user-management', label: 'User Management', icon: '⚙' },
     { to: '/export-profile', label: 'Export Profile', icon: '▤' },
   ],
 };
