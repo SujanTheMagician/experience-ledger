@@ -1,32 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchExperiences } from '../api/experiences';
+import { groupByStudent } from '../utils/experienceStats';
 import './Analytics.css';
-
-function groupByStudent(experiences) {
-  const byStudent = new Map();
-
-  for (const exp of experiences) {
-    const key = exp.student_id;
-    if (!byStudent.has(key)) {
-      byStudent.set(key, {
-        id: key,
-        name: exp.student_name,
-        email: exp.student_email,
-        total: 0,
-        approved: 0,
-        pending: 0,
-        other: 0,
-      });
-    }
-    const record = byStudent.get(key);
-    record.total += 1;
-    if (exp.status === 'Approved') record.approved += 1;
-    else if (exp.status === 'Pending Verification') record.pending += 1;
-    else record.other += 1;
-  }
-
-  return Array.from(byStudent.values()).sort((a, b) => b.total - a.total);
-}
 
 function StudentRecords() {
   const [experiences, setExperiences] = useState([]);
