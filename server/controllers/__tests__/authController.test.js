@@ -43,6 +43,16 @@ describe('register', () => {
     expect(res.status).toHaveBeenCalledWith(409);
   });
 
+  it('rejects a public registration attempt that requests the admin role', async () => {
+    const req = { body: { name: 'Alex', email: 'alex@example.com', password: 'secret123', role: 'admin' } };
+    const res = mockRes();
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(pool.query).not.toHaveBeenCalled();
+  });
+
   it('hashes the password before storing it and returns a token', async () => {
     pool.query
       .mockResolvedValueOnce({ rows: [] }) // no existing user

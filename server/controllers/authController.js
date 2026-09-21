@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const { pool } = require('../config/db');
 
-const ALLOWED_ROLES = ['student', 'mentor', 'placement_officer', 'admin'];
+// 'admin' is deliberately excluded here - it must only ever be granted by an
+// already-authenticated admin via PATCH /api/users/:id/role (see userController.js),
+// never self-assigned through the public, unauthenticated register endpoint.
+const SELF_REGISTERABLE_ROLES = ['student', 'mentor', 'placement_officer'];
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const signToken = (user) =>
@@ -25,8 +28,10 @@ const register = async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'name, email, and password are required' });
     }
-    if (!ALLOWED_ROLES.includes(role)) {
-      return res.status(400).json({ success: false, message: `role must be one of: ${ALLOWED_ROLES.join(', ')}` });
+    if (!SELF_REGISTERABLE_ROLES.includes(role)) {
+      return res
+        .status(400)
+        .json({ success: false, message: `role must be one of: ${SELF_REGISTERABLE_ROLES.join(', ')}` });
     }
 
     const { rows: existing } = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
