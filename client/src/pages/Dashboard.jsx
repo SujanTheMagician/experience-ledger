@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import StatCard from '../components/StatCard';
 import StatusBadge from '../components/StatusBadge';
 import { useAuth } from '../context/useAuth';
 import { fetchExperiences } from '../api/experiences';
-import {
-  dashboardStats,
-  ledgerCompletion,
-  skillCloud,
-  verificationLog,
-} from '../data/mockData';
+import { statusCounts, relativeDays } from '../utils/experienceStats';
 import './Dashboard.css';
 
-const STAT_ICONS = { sparkle: '✦', clock: '◔', bolt: '⚡', hash: '#' };
 const RECENT_ACTIVITY_LIMIT = 5;
+const VERIFICATION_LOG_LIMIT = 4;
 
 function Dashboard() {
   const { user } = useAuth();
@@ -40,13 +35,16 @@ function Dashboard() {
     };
   }, [user.id]);
 
+  const counts = useMemo(() => statusCounts(experiences), [experiences]);
   const recentActivity = experiences.slice(0, RECENT_ACTIVITY_LIMIT);
   const hasActivity = recentActivity.length > 0;
   const firstName = user.name.split(' ')[0];
 
-  const stats = dashboardStats.map((stat) =>
-    stat.label === 'Total Experiences' ? { ...stat, value: experiences.length, meta: undefined } : stat
-  );
+  const ledgerPercent = counts.total > 0 ? Math.round((counts.approved / counts.total) * 100) : 0;
+  const ledgerNote =
+    counts.total === 0
+      ? 'Add your first experience to start building your verified ledger.'
+      : `${counts.approved} of ${counts.total} experience(s) verified so far.`;
 
   return (
     <div className="dashboard">
@@ -59,15 +57,10 @@ function Dashboard() {
       </div>
 
       <div className="dashboard-stats">
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            unit={stat.unit}
-            icon={STAT_ICONS[stat.icon]}
-          />
-        ))}
+        <StatCard label="Total Experiences" value={counts.total} icon="✦" />
+        <StatCard label="Approved" value={counts.approved} icon="✓" />
+        <StatCard label="Pending Review" value={counts.pending} icon="◔" />
+        <StatCard label="Needs Attention" value={counts.needsAttention} icon="!" />
       </div>
 
       <div className="dashboard-grid">
@@ -115,39 +108,27 @@ function Dashboard() {
           <div className="ledger-completion">
             <div className="ledger-completion-top">
               <h3>Ledger Completion</h3>
-              <span className="ledger-completion-percent">{ledgerCompletion.percent}%</span>
+              <span className="ledger-completion-percent">{ledgerPercent}%</span>
             </div>
             <div className="ledger-completion-bar">
-              <div className="ledger-completion-fill" style={{ width: `${ledgerCompletion.percent}%` }} />
+              <div className="ledger-completion-fill" style={{ width: `${ledgerPercent}%` }} />
             </div>
-            <p>{ledgerCompletion.note}</p>
-          </div>
-
-          <div className="side-card">
-            <h3>Skill Cloud</h3>
-            <div className="skill-cloud">
-              {skillCloud.map((skill) => (
-                <span key={skill.name} className={'skill-chip' + (skill.highlighted ? ' skill-chip-active' : '')}>
-                  {skill.name}
-                </span>
-              ))}
-            </div>
-            <Link to="/export-profile" className="side-card-link">View full breakdown</Link>
+            <p>{ledgerNote}</p>
           </div>
 
           <div className="side-card">
             <h3>Verification Log</h3>
-            {verificationLog.length === 0 ? (
+            {experiences.length === 0 ? (
               <p className="dashboard-empty-subtitle">No activity yet</p>
             ) : (
               <ul className="verification-log">
-                {verificationLog.map((log) => (
-                  <li key={log.id}>
+                {experiences.slice(0, VERIFICATION_LOG_LIMIT).map((exp) => (
+                  <li key={exp.id}>
                     <div>
-                      <div className="verification-log-org">{log.org}</div>
-                      <div className="verification-log-meta">{log.meta}</div>
+                      <div className="verification-log-org">{exp.organization}</div>
+                      <div className="verification-log-meta">Submitted {relativeDays(exp.created_at)}</div>
                     </div>
-                    <span className={`verification-dot verification-dot-${log.state}`} />
+                    <span className={`verification-dot verification-dot-${exp.status === 'Pending Verification' ? 'pending' : 'done'}`} />
                   </li>
                 ))}
               </ul>
