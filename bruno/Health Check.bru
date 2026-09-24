@@ -1,0 +1,15 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/
+  body: none
+  auth: none
+}
+
+docs {
+  Basic liveness check - returns plain text confirming the API is running.
+}

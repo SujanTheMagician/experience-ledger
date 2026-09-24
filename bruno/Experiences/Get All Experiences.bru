@@ -1,0 +1,26 @@
+meta {
+  name: Get All Experiences
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/experiences
+  body: none
+  auth: none
+}
+
+params:query {
+  student:
+  status:
+}
+
+docs {
+  Lists all experiences, joined against the owning student's name, email,
+  and role. Both query params are optional:
+  - student: filter to one student's id
+  - status: Pending Verification | Approved | Rejected | Changes Requested
+
+  Leave both blank to list every experience. This route is public (no
+  auth) since the ledger's read side is meant to be browsable.
+}

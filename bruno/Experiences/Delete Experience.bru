@@ -1,0 +1,23 @@
+meta {
+  name: Delete Experience
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/experiences/1
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Deletes an experience. A student may only delete their own; a mentor /
+  placement_officer / admin may delete any of them. Returns 403 if
+  neither condition is met, 404 if the experience doesn't exist.
+
+  Run Login first so {{token}} is populated.
+}

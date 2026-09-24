@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createExperience } from '../api/experiences';
+import { uploadEvidenceFile } from '../api/uploads';
 import './AddExperience.css';
+
+const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 const initialForm = {
   organization: '',
@@ -16,16 +20,49 @@ const initialForm = {
 
 function AddExperience() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState(initialForm);
   const [skills, setSkills] = useState(['React', 'Python', 'TypeScript']);
   const [skillInput, setSkillInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   const updateField = (field) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file later
+    if (!file) return;
+
+    setUploadError(null);
+
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      setUploadError('Only PDF, JPG, or PNG files are allowed');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setUploadError('File must be 10MB or smaller');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const data = await uploadEvidenceFile(file);
+      setUploadedFile(data);
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeUploadedFile = () => setUploadedFile(null);
 
   const addSkill = (e) => {
     if (e.key === 'Enter' && skillInput.trim()) {
@@ -55,7 +92,7 @@ function AddExperience() {
         duration,
         description: form.description,
         outcome: form.outcomes,
-        evidenceLink: form.projectLink,
+        evidenceLink: uploadedFile?.url || form.projectLink,
       });
       navigate('/');
     } catch (err) {
@@ -144,12 +181,47 @@ function AddExperience() {
 
           <fieldset className="form-section">
             <legend>🛡 Verification</legend>
-            <div className="upload-dropzone">
-              <div className="upload-icon" aria-hidden="true">⬆</div>
-              <p className="upload-title">Upload Certificate or Proof of Work</p>
-              <p className="upload-subtitle">PDF, JPG, or PNG (Max 10MB)</p>
-              <button type="button" className="btn-secondary">Browse Files</button>
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+
+            {!uploadedFile && (
+              <div className="upload-dropzone">
+                <div className="upload-icon" aria-hidden="true">⬆</div>
+                <p className="upload-title">Upload Certificate or Proof of Work</p>
+                <p className="upload-subtitle">PDF, JPG, or PNG (Max 10MB)</p>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                >
+                  {uploading ? 'Uploading…' : 'Browse Files'}
+                </button>
+              </div>
+            )}
+
+            {uploadedFile && (
+              <div className="upload-file-chip">
+                <span className="upload-file-icon" aria-hidden="true">📎</span>
+                <span className="upload-file-name">{uploadedFile.originalName}</span>
+                <button
+                  type="button"
+                  className="skill-chip-remove"
+                  onClick={removeUploadedFile}
+                  aria-label="Remove uploaded file"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {uploadError && <p className="secure-note" style={{ color: '#c0392b' }}>⚠ {uploadError}</p>}
+
             <label className="form-label" htmlFor="projectLink">Project Link (optional)</label>
             <input
               id="projectLink"
@@ -157,6 +229,7 @@ function AddExperience() {
               placeholder="github.com/username/project"
               value={form.projectLink}
               onChange={updateField('projectLink')}
+              disabled={Boolean(uploadedFile)}
             />
           </fieldset>
         </div>

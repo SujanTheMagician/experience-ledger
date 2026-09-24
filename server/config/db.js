@@ -1,7 +1,13 @@
 const { Pool } = require('pg');
 
+// Render's external Postgres hostnames require SSL; its internal/private network
+// connections (used by services deployed on Render itself) and local dev don't.
+// Detecting this from the URL keeps both cases working without a separate env var.
+const requiresSsl = (process.env.DATABASE_URL || '').includes('render.com');
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: requiresSsl ? { rejectUnauthorized: false } : false,
 });
 
 const connectDB = async () => {

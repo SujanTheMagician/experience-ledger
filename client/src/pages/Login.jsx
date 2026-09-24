@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 import './Auth.css';
 
 function Login() {
@@ -49,6 +50,13 @@ function Login() {
             {submitting ? 'Logging in…' : 'Log In'}
           </button>
         </form>
+
+        <div className="auth-divider"><span>or</span></div>
+
+        <GoogleSignInButton
+          onSuccess={() => navigate(location.state?.from ?? '/', { replace: true })}
+          onError={setError}
+        />
 
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Create one</Link>
